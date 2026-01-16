@@ -1,6 +1,6 @@
 # Formalizing Mathematics in Lean 2025 Class Projects
 
-# Bannai-Bannai-Stanton_Theorem
+# Bannai-Bannai-Stanton Theorem
 
 Formalizing Mathematics in Lean - ETH Zurich
 
