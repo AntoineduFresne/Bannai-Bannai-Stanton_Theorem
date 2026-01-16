@@ -1,12 +1,34 @@
-# Lean / Lake build artifacts (CRITICAL: Do not remove)
-.lake/
-lake-packages/
-build/
+# --- Lake (Build System) ---
+# Ignore the build directory where compiled files and dependencies (Mathlib) are stored
+/.lake/
+/build/
+/lake-packages/
 
-# Operating System files
+# --- System Files ---
+# Mac
 .DS_Store
-Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 
-# Editor directories (Optional, but recommended)
+# Windows
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# --- Editors ---
+# VS Code (Optional: remove this if you want to share project settings)
 .vscode/
+
+# Vim / Emacs swap files
+*~
 *.swp
+*.swo
+
+# --- Lean Specifics ---
+# In case any compiled files slip out of the build folder (rare but possible)
+*.olean
+*.ilean
+*.c
+*.o

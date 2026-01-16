@@ -1,12 +1,14 @@
-name = "Project"
+name = "Bannai-Bannai-Stanton_Theorem"
 version = "0.1.0"
-keywords = ["math", "lean4", "combinatorics"]
-defaultTargets = ["bound_on_distance_set"]
+description = "Formalisation of the Bannai-Bannai-Stanton theorem bound on distance sets"
+authors = ["Antoine du Fresne von Hohenesche"]
+license = "Apache-2.0"
+keywords = ["math", "geometry", "combinatorics", "distance-sets"]
+defaultTargets = ["Project"]
 
 [[require]]
 name = "mathlib"
-git = "https://github.com/leanprover-community/mathlib4"
+scope = "leanprover-community"
 
 [[lean_lib]]
-name = "bound_on_distance_set"
-srcDir = "Project"
+name = "Project"
