@@ -1,0 +1,12 @@
+# Lean / Lake build artifacts (CRITICAL: Do not remove)
+.lake/
+lake-packages/
+build/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Editor directories (Optional, but recommended)
+.vscode/
+*.swp

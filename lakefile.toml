@@ -1,0 +1,13 @@
+name = "Project"
+version = "0.1.0"
+keywords = ["math", "lean4", "combinatorics"]
+defaultTargets = ["bound_on_distance_set"]
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+tag = "v4.26.0"
+
+[[lean_lib]]
+name = "bound_on_distance_set"
+srcDir = "Project"
