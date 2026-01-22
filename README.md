@@ -5,7 +5,7 @@ Formalising Mathematics in Lean - ETH Zurich
 
 > **Note:** Please refer to the provided PDF report
 
-> *Potential improvement/remark:* After reflection, I noticed that one can maybe reduce the number of lines of this proof by removing at least the lemma `finite_distance_set_imp_finite_set` and related parts, using the following trick:
+ Potential improvement/remark: After reflection, I noticed that one can maybe reduce the number of lines of this proof by removing at least the lemma `finite_distance_set_imp_finite_set` and related parts, using the following trick:
 
 We first show that `S.Finite` implies $|S| \leq\binom{d + |D(S)|}{d}$ (so we do the exact proof of the Bannai-Bannai-Stanton bound but we assume $S$ to be finite). Then we use a standard compactness argument to extend the result to any $S$ by the following: if $S$ is finite we are already done; otherwise, $S$ is infinite, we show this leads to a contradiction.
 
