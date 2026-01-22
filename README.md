@@ -7,7 +7,7 @@ Formalising Mathematics in Lean - ETH Zurich
 
 > **Potential improvement/remark:** After reflection, I noticed that one can maybe reduce the number of lines of this proof by removing at least the lemma `finite_distance_set_imp_finite_set` and related parts, using the following trick:
 
-We first show that `S.Finite` implies $|S| \leq \binom{d + |D(S)|}{d}$ (so we do the exact proof of the Bannai-Bannai-Stanton bound but we assume $S$ to be finite). Then we use a standard compactness argument to extend the result to any $S$ by the following: if $S$ is finite we are already done; otherwise, $S$ is infinite, we show this leads to a contradiction.
+We first show that `S.Finite` implies $|S| \leq {d + |D(S)|}.choose{d}$ (so we do the exact proof of the Bannai-Bannai-Stanton bound but we assume $S$ to be finite). Then we use a standard compactness argument to extend the result to any $S$ by the following: if $S$ is finite we are already done; otherwise, $S$ is infinite, we show this leads to a contradiction.
 
 There must exist a finite subset $S' \subset S$ such that $|D(S')| = |D(S)|$ (otherwise, if every finite subset missed at least one distance, we could iteratively pick pairs of points from $S$ realizing the "missing" distances; since $D(S)$ is finite, this process must terminate, yielding a finite subset that realizes all distances).
 
