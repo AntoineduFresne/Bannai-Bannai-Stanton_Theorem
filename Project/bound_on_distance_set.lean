@@ -63,7 +63,7 @@ lemma degree_distPoly_from_le {d : ℕ}
     (y : EuclideanSpace R (Fin d)) :
      (distPoly_from y).totalDegree ≤ 2 := by
   by_cases R_nontrivial : Nontrivial R
-  · apply (totalDegree_finset_sum _ _).trans
+  · apply (totalDegree_finsetSum _ _).trans
     simp only [sub_eq_add_neg, Finset.sup_le_iff, Finset.mem_univ, forall_const]
     intro i
     apply (totalDegree_pow _ _).trans
@@ -77,7 +77,7 @@ lemma degree_distPoly_from_le {d : ℕ}
 lemma degree_distPoly (d : ℕ) :
     (distPoly d : MvPolynomial (Fin (2 * d)) R).totalDegree ≤ 2 := by
   by_cases R_nontrivial : Nontrivial R
-  · apply (totalDegree_finset_sum _ _).trans
+  · apply (totalDegree_finsetSum _ _).trans
     simp only [sub_eq_add_neg, Finset.sup_le_iff, Finset.mem_univ, forall_const]
     intro i
     apply (totalDegree_pow _ _).trans
@@ -91,7 +91,7 @@ lemma degree_distPoly (d : ℕ) :
 lemma degree_Product_distPoly_le
     {d : ℕ}
     (D : Finset R) : (Product_distPoly d D).totalDegree ≤ 2 * D.card := by
-  apply (totalDegree_finset_prod _ _).trans
+  apply (totalDegree_finsetProd _ _).trans
   have : ∑ r ∈ D, 2 =  2 * D.card:= by simp [mul_comm]
   -- each degree is ≤ 2 by previous lemma
   rw [← this]
@@ -106,7 +106,7 @@ lemma degree_Product_distPoly_from_le
     (y : EuclideanSpace R (Fin d)) (D : Finset R) :
     totalDegree (Product_distPoly_from y D) ≤ 2 * D.card := by
   -- Degree of a product is ≤ sum of degrees
-  apply (totalDegree_finset_prod _ _).trans
+  apply (totalDegree_finsetProd _ _).trans
   have : ∑ r ∈ D, 2 =  2 * D.card:= by simp only [Finset.sum_const, smul_eq_mul, mul_comm]
   -- each degree is ≤ 2 by previous lemma
   rw [← this]
@@ -258,7 +258,7 @@ noncomputable def dim {d : ℕ}
 -- between monomials of degree ≤ s and multisets over Fin d of cardinality ≤ s.
 open Multiset
 
-def finsuppToMultisetRestricted {d s : ℕ} :
+noncomputable def finsuppToMultisetRestricted {d s : ℕ} :
   {f : Fin d →₀ ℕ | f.sum (fun _ n ↦ n) ≤ s} ≃ {m : Multiset (Fin d) // Multiset.card m ≤ s} :=
   Equiv.subtypeEquiv Multiset.toFinsupp.symm.toEquiv (by
     intro f
@@ -334,7 +334,7 @@ def multisetToSymOption {d s : ℕ} :
       congr with x; rw [eq_comm] }
 
 -- We can now instantiate the Fintype structure on the set of monomials of degree ≤ s.
-instance {d s : ℕ} : Fintype {f : Fin d →₀ ℕ | f.sum (fun _ n ↦ n) ≤ s} :=
+noncomputable instance {d s : ℕ} : Fintype {f : Fin d →₀ ℕ | f.sum (fun _ n ↦ n) ≤ s} :=
   Fintype.ofEquiv (Sym (Option (Fin d)) s)
   (finsuppToMultisetRestricted.trans multisetToSymOption).symm
 
@@ -482,7 +482,7 @@ lemma eval_split {d : ℕ}
       · apply Finset.prod_congr rfl
         intro i _
         simp only [Fin.natAdd_eq_addNat, finCongr_symm, finCongr_apply, Finsupp.equivFunOnFinite,
-          Set.Finite.toFinset_setOf, ne_eq, Equiv.coe_fn_symm_mk, Finsupp.coe_mk, m_right]
+         Equiv.coe_fn_symm_mk, Finsupp.coe_mk, m_right]
         rw [← Fin.natAdd_eq_addNat, Fin.append_right]
       · simp only [pow_zero, implies_true]
   · simp [Function.comp_apply, implies_true]
@@ -520,8 +520,16 @@ lemma bilinear_form_vanishes_on_orthogonal_complement
   -- Now, we expand Φ_P_A f g and rewrite the sum over all monomials in p.
   have : Φ_P_A f g = ∑ a : A, ∑ b : A, f a * M a b * g b := by simp [Φ_P_A, Matrix.toBilin_apply]
   simp only [this, M]
-  rw [← Finsupp.sum_single p]
-  simp only [Finset.univ_eq_attach, Finsupp.sum, map_sum, Finset.mul_sum, Finset.sum_mul]
+  have hexp : ∀ a b : A,
+      f a * (eval ((Fin.append a.1 b.1) ∘ Fin.cast (by rw [two_mul])) p) * g b
+      = ∑ m ∈ p.support, f a *
+          (eval ((Fin.append a.1 b.1) ∘ Fin.cast (by rw [two_mul]))
+            (Finsupp.single m (coeff m p))) * g b := by
+    intro a b
+    conv_lhs => rw [p.as_sum, map_sum]
+    rw [Finset.mul_sum, Finset.sum_mul]
+    simp only [MvPolynomial.single_eq_monomial]
+  simp only [Finset.univ_eq_attach, hexp]
   have h_swap : ∑ b : A, ∑ a : A, ∑ m ∈ p.support, f a * (eval ((Fin.append a.1 b.1)
       ∘ Fin.cast (by rw [two_mul])) (Finsupp.single m (coeff m p))) * g b =
       ∑ b : A, ∑ m ∈ p.support, ∑ a : A,
@@ -572,11 +580,14 @@ lemma bilinear_form_vanishes_on_orthogonal_complement
   · have h_deg : m_left.support.sum (fun i => m_left i) +
     m_right.support.sum (fun i => m_right i) ≤ 2 * s + 1 := by
       rw [totalDegree, Finset.sup_le_iff] at hp_deg
-      convert hp_deg m hm
-      change m_left.sum (fun _ x => x) + m_right.sum (fun _ x => x) = m.sum (fun _ x => x)
-      simp only [implies_true, Finsupp.sum_fintype _]
-      rw [← Equiv.sum_comp (finCongr h_cast).symm, Fin.sum_univ_add]
-      rfl
+      have h_split : m_left.support.sum (fun i => m_left i) +
+          m_right.support.sum (fun i => m_right i) = m.sum (fun _ x => x) := by
+        change m_left.sum (fun _ x => x) + m_right.sum (fun _ x => x) = m.sum (fun _ x => x)
+        simp only [implies_true, Finsupp.sum_fintype _]
+        rw [← Equiv.sum_comp (finCongr h_cast).symm, Fin.sum_univ_add]
+        rfl
+      rw [h_split]
+      exact hp_deg m hm
     -- We do a case distinction on which of m_left or m_right
     -- has degree ≤ s.
     rcases le_or_gt (m_left.support.sum (fun i => m_left i)) s with h_left_le | h_left_gt
@@ -596,6 +607,7 @@ lemma bilinear_form_vanishes_on_orthogonal_complement
         Finset.sum_ite_eq, Finset.mem_univ, if_true,
         mul_ite, mul_one, mul_zero, ite_mul, zero_mul, Pi.basisFun_repr] at h_orth
         convert h_orth
+        rfl
       simp only [Finset.univ_eq_attach] at h_S_left
       rw [h_S_left]
       simp only [mul_zero, zero_mul]
@@ -631,9 +643,10 @@ lemma matrix_rank_add_le {n : Type*} [Fintype n]
   (A + B).rank ≤ A.rank + B.rank := by
   rw [Matrix.rank, Matrix.rank, Matrix.rank]
   simp only [Matrix.mulVecLin]
+  refine le_trans (Submodule.finrank_mono ?_)
+    (Submodule.finrank_add_le_finrank_add_finrank _ _)
   rw [map_add]
-  apply le_trans (Submodule.finrank_mono (LinearMap.range_add_le _ _))
-  exact Submodule.finrank_add_le_finrank_add_finrank _ _
+  exact LinearMap.range_add_le _ _
 
 -- We now state the Croot-Lev-Pach lemma as presented in the paper by
 -- Petrov and Pohoata (slightly generalised). We split it into two parts for clarity.
@@ -698,7 +711,7 @@ lemma Croot_Lev_Pach_lemma_generalised_1st_part
       ext a b
       simp only [M, M1, M2, Matrix.add_apply]
       rw [← Finset.sum_union]
-      · rw [← Finsupp.sum_single p, Finsupp.sum, map_sum]
+      · conv_lhs => rw [p.as_sum, map_sum]
         apply Finset.sum_congr
         · ext m
           simp only [Finset.mem_union, Finset.mem_filter, S1, S2]
@@ -720,8 +733,6 @@ lemma Croot_Lev_Pach_lemma_generalised_1st_part
             eval a.1 (monomial (m_left m) 1) * eval b.1 (monomial (m_right m) 1) := by
             convert eval_split m a.1 b.1 -- We use the second preliminary lemma here.
           erw [h_eval_split']
-          change _ = coeff m (p.sum Finsupp.single) * _ * _
-          rw [Finsupp.sum_single p]
           ring
       · rw [Finset.disjoint_filter]
         intro m _ h1 h2
@@ -813,7 +824,7 @@ lemma Croot_Lev_Pach_lemma_generalised_1st_part
       rw [Matrix.range_mulVecLin, Submodule.span_le]
       intro v hv
       obtain ⟨a, rfl⟩ := Set.mem_range.mp hv
-      simpa only [Matrix.col_apply'] using h_rows a
+      simpa only [Matrix.col_apply', Matrix.transpose_apply, SetLike.mem_coe] using h_rows a
     rw [h_M_eq, two_mul]
     -- Finally, we use the subadditivity of rank
     -- (fourth preliminary lemma: `matrix_rank_add_le`).
@@ -982,7 +993,7 @@ theorem bannai_bannai_stanton_bound {d s : ℕ} (S : Set (EuclideanSpace ℝ (Fi
   -- In this case, Q is positive definite (if A is non-empty).
   have h_Q_definite : A.Nonempty → ∀ v : A → ℝ, v ≠ 0 → Q v > 0 := by
     intro hA_nonempty v hv
-    simp only [Q, M_eval, mul_ite, mul_zero, ite_mul, zero_mul, Finset.sum_ite_eq, P, A, M, D]
+    simp only [Q, M_eval, mul_ite, mul_zero, ite_mul, zero_mul, Finset.sum_ite_eq, P, M, D]
     have h_prod_pos: 0 < ∏ r ∈ D, r ^ 2 := by
       apply Finset.prod_pos
       intro r hr
